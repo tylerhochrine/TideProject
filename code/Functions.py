@@ -55,3 +55,11 @@ def get_current_water_level(dtmTime, tideHeight):
     tideHeight = float(response.json()['data'][0]['v'])
 
     return (dtmTime, tideHeight)
+
+
+def get_time():
+    curr_time = time.strftime("%I:%M", time.localtime())
+    ltime = [int(x) for x in curr_time if x != ':']
+    
+    return ltime
+    

@@ -26,6 +26,34 @@ class Tide(SampleBase):
             )
             self.q.put([self.dtmTime, self.tideHeight])
 
+    
+    def display_time(self, width, height, canvas, ltime):
+        canvas.SetPixel(width-12, height-4, 0, 0, 0)
+        canvas.SetPixel(width-12, height-6, 0, 0, 0)
+
+        first_d = anim.CLOCK_NUMS[ltime[0]]
+        second_d = anim.CLOCK_NUMS[ltime[1]]
+        third_d = anim.CLOCK_NUMS[ltime[2]]
+        fourth_d = anim.CLOCK_NUMS[ltime[3]]
+
+        first_start_w, first_start_h = width - 21, height - 7
+        second_start_w, second_start_h = width - 16, height - 7
+        third_start_w, third_start_h = width - 10, height - 7
+        fourth_start_w, fourth_start_h = width - 5, height - 7
+
+        for x in range(3):
+            for y in range(5):
+                if ltime[0] != 0:
+                    if first_d[y][x] == 1:
+                        canvas.SetPixel(first_start_w + x, first_start_h + y, 0, 0, 0)
+                if second_d[y][x] == 1:
+                    canvas.SetPixel(second_start_w + x, second_start_h + y, 0, 0, 0)
+                if third_d[y][x] == 1:
+                    canvas.SetPixel(third_start_w + x, third_start_h + y, 0, 0, 0)
+                if fourth_d[y][x] == 1:
+                    canvas.SetPixel(fourth_start_w + x, fourth_start_h + y, 0, 0, 0)
+
+
     def run(self):
         width = self.matrix.width
         height = self.matrix.height
@@ -79,6 +107,8 @@ class Tide(SampleBase):
             third_r = anim.STATES[curr_state][2]
             fourth_r = anim.STATES[curr_state][3]
             fifth_r = anim.STATES[curr_state][4]
+
+            self.display_time(width, height, canvas, func.get_time())
 
             canvas = self.matrix.SwapOnVSync(canvas)
             time.sleep(0.5)
