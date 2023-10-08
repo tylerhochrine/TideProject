@@ -75,6 +75,11 @@ class Tide(SampleBase):
             if not self.q.empty():
                 self.dtmTime, self.tideHeight = self.q.get()
 
+                if self.tideHeight < 3:
+                    self.tideHeight = 3
+                elif self.tideHeight > 15:
+                    self.tideHeight = 15
+                
             pixelHeight = height - int(float(self.tideHeight) * 4)
 
             for x in range(width):
