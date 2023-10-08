@@ -23,38 +23,56 @@ def wait_for_internet_connection():
 # dtmTime will be 0 if not run before, otherwise it will be equal to the most recent water level record
 # function will sleep until the current minute is divisible by 6
 # data will only return once NOAA has updated the data
-def get_current_water_level(dtmTime, tideHeight):
+def get_current_water_level(data):
     noaa_url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=8443970&product" \
-               "=water_level&datum=STND&time_zone=lst_ldt&units=english&format=json "
+               "=water_level&datum=STND&time_zone=lst_ldt&units=english&format=json"
+    response = requests.get(noaa_url)
 
-    if dtmTime != '':
+    data['dtmTime'] = response.json()['data'][0]['t']
+    data['tideHeight'] = float(response.json()['data'][0]['v'])
+
+    return data
+
+
+def get_air_temp(data):
+    noaa_url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=8443970&product" \
+               "=air_temperature&datum=STND&time_zone=lst_ldt&units=english&format=json"
+    response = requests.get(noaa_url)
+
+    data['airTemp'] = response.json()['data'][0]['v']
+
+    return data
+
+
+def get_data(data):    
+    if data['dtmTime'] != '':
         dtmNow = datetime.today()
 
-        print(dtmTime, tideHeight, dtmNow)
+        print(data['airTemp'], data['dtmTime'], data['tideHeight'], dtmNow)
 
-        # remaining minutes and seconds until the minute is divisible by 6
+        # remaining time until the minute is divisible by 6
         intSleepMinutes = 5 - (dtmNow.minute % 6)
         intSleepSeconds = 60 - dtmNow.second
 
         time.sleep(intSleepMinutes * 60 + intSleepSeconds)
 
-        response = requests.get(noaa_url)
+        data = get_current_water_level(data)
+        data = get_air_temp(data)
 
         # loops until the api updates the data
-        while response.json()['data'][0]['t'] == dtmTime:
-            # sleeps for 5 seconds if data is still equal to previous data so as to not call API too much
-            time.sleep(5)
+        while get_current_water_level(data)['dtmTime'] == data['dtmTime']:
+            # sleeps for 10 seconds if data is unchanged to not call API too much
+            time.sleep(10)
 
-            response = requests.get(noaa_url)
+            data = get_current_water_level(data)
+            data = get_air_temp(data)
 
     # runs immediately if not run before
     else:
-        response = requests.get(noaa_url)
+        data = get_current_water_level(data)
+        data = get_air_temp(data)
 
-    dtmTime = response.json()['data'][0]['t']
-    tideHeight = float(response.json()['data'][0]['v'])
-
-    return (dtmTime, tideHeight)
+    return data
 
 
 def get_time():

@@ -7,24 +7,22 @@ import Animation as anim
 
 
 class Tide(SampleBase):
-    dtmTime = ""
-    tideHeight = 1
+    data = {'dtmTime': '', 'tideHeight': 0, 'airTemp': 0}
     q = mp.Queue()
 
     def __init__(self, *args, **kwargs):
         super(Tide, self).__init__(*args, **kwargs)
         func.wait_for_internet_connection()
-        self.dtmTime, self.tideHeight = func.get_current_water_level(
-            self.dtmTime, self.tideHeight
-        )
-        self.q.put([self.dtmTime, self.tideHeight])
 
-    def get_tide_data(self, q):
+        self.data = func.get_data(self.data)
+
+        self.q.put(self.data)
+
+
+    def get_data(self, q):
         while True:
-            self.dtmTime, self.tideHeight = func.get_current_water_level(
-                self.dtmTime, self.tideHeight
-            )
-            self.q.put([self.dtmTime, self.tideHeight])
+            self.data = func.get_data(self.data)
+            self.q.put(self.data)
 
     
     def display_time(self, width, height, canvas, ltime):
@@ -58,7 +56,7 @@ class Tide(SampleBase):
         width = self.matrix.width
         height = self.matrix.height
 
-        p = mp.Process(target=self.get_tide_data, args=(self.q,))
+        p = mp.Process(target=self.get_data, args=(self.q,))
         p.start()
 
         curr_state = 0
@@ -73,14 +71,14 @@ class Tide(SampleBase):
         while True:
             canvas.Clear()
             if not self.q.empty():
-                self.dtmTime, self.tideHeight = self.q.get()
+                self.data = self.q.get()
 
-                if self.tideHeight < 3:
-                    self.tideHeight = 3
-                elif self.tideHeight > 15:
-                    self.tideHeight = 15
+                if self.data['tideHeight'] < 3:
+                    self.data['tideHeight'] = 3
+                elif self.data['tideHeight'] > 15:
+                    self.data['tideHeight'] = 15
                 
-            pixelHeight = height - int(float(self.tideHeight) * 4)
+            pixelHeight = height - int(float(self.data['tideHeight']) * 4)
 
             for x in range(width):
                 for y in range(pixelHeight + 3, height):
