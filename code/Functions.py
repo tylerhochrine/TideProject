@@ -39,7 +39,7 @@ def get_air_temp(data):
                "=air_temperature&datum=STND&time_zone=lst_ldt&units=english&format=json"
     response = requests.get(noaa_url)
 
-    data['airTemp'] = response.json()['data'][0]['v']
+    data['airTemp'] = round(float(response.json()['data'][0]['v']))
 
     return data
 
@@ -48,7 +48,7 @@ def get_data(data):
     if data['dtmTime'] != '':
         dtmNow = datetime.today()
 
-        print(data['airTemp'], data['dtmTime'], data['tideHeight'], dtmNow)
+        print(data, dtmNow)
 
         # remaining time until the minute is divisible by 6
         intSleepMinutes = 5 - (dtmNow.minute % 6)
@@ -56,21 +56,15 @@ def get_data(data):
 
         time.sleep(intSleepMinutes * 60 + intSleepSeconds)
 
-        data = get_current_water_level(data)
-        data = get_air_temp(data)
+        tempTime = data['dtmTime']
 
         # loops until the api updates the data
-        while get_current_water_level(data)['dtmTime'] == data['dtmTime']:
+        while get_current_water_level(data)['dtmTime'] == tempTime:
             # sleeps for 10 seconds if data is unchanged to not call API too much
             time.sleep(10)
 
-            data = get_current_water_level(data)
-            data = get_air_temp(data)
-
-    # runs immediately if not run before
-    else:
-        data = get_current_water_level(data)
-        data = get_air_temp(data)
+    data = get_current_water_level(data)
+    data = get_air_temp(data)
 
     return data
 

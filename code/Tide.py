@@ -72,13 +72,8 @@ class Tide(SampleBase):
             canvas.Clear()
             if not self.q.empty():
                 self.data = self.q.get()
-
-                if self.data['tideHeight'] < 3:
-                    self.data['tideHeight'] = 3
-                elif self.data['tideHeight'] > 15:
-                    self.data['tideHeight'] = 15
                 
-            pixelHeight = height - int(float(self.data['tideHeight']) * 4)
+            pixelHeight = height - int(float(self.data['tideHeight']) * 3) + 8
 
             for x in range(width):
                 for y in range(pixelHeight + 3, height):
