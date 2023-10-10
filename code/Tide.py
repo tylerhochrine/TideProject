@@ -6,6 +6,9 @@ import Functions as func
 import Animation as anim
 
 
+PIXEL_MULTI = 2.6875
+
+
 class Tide(SampleBase):
     data = {'dtmTime': '', 'tideHeight': 0, 'airTemp': 0}
     q = mp.Queue()
@@ -72,19 +75,19 @@ class Tide(SampleBase):
             canvas.Clear()
             if not self.q.empty():
                 self.data = self.q.get()
-                
-            pixelHeight = height - int(float(self.data['tideHeight']) * 3) + 8
+                            
+            pixelHeight = height - int(float(self.data['tideHeight']) * PIXEL_MULTI) - 8
 
             for x in range(width):
-                for y in range(pixelHeight + 3, height):
+                for y in range(pixelHeight, height):
                     canvas.SetPixel(x, y, 0, 157, 196)
 
             first_height, second_height, third_height, fourth_height, fifth_height = (
+                pixelHeight - 5,
+                pixelHeight - 4,
+                pixelHeight - 3,
                 pixelHeight - 2,
                 pixelHeight - 1,
-                pixelHeight,
-                pixelHeight + 1,
-                pixelHeight + 2,
             )
 
             for x in range(width):
