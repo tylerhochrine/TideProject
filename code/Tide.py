@@ -31,6 +31,55 @@ class Tide(SampleBase):
             self.q.put(self.data)
 
     
+    def display_waves(self, width, height, canvas, curr_state):
+        first_r = anim.STATES[curr_state][0]
+        second_r = anim.STATES[curr_state][1]
+        third_r = anim.STATES[curr_state][2]
+        fourth_r = anim.STATES[curr_state][3]
+        fifth_r = anim.STATES[curr_state][4]
+
+        # 2.142 - min since early June 2023, 16.024 - max since early June 2023
+        pixelHeight = height - int(float(self.data['tideHeight']) * PIXEL_MULTI) - 1
+            
+        if pixelHeight > 56:
+           pixelHeight = 56
+        if pixelHeight < 13:
+            pixelHeight = 13
+
+        for x in range(width):
+            for y in range(pixelHeight, height):
+                canvas.SetPixel(x, y, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
+
+        first_height, second_height, third_height, fourth_height, fifth_height = (
+            pixelHeight - 5,
+            pixelHeight - 4,
+            pixelHeight - 3,
+            pixelHeight - 2,
+            pixelHeight - 1,
+        )
+
+        for x in range(width):
+            if first_r[x] == 1:
+                canvas.SetPixel(x, first_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
+            if second_r[x] == 1:
+                canvas.SetPixel(x, second_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
+            if third_r[x] == 1:
+                canvas.SetPixel(x, third_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
+            if fourth_r[x] == 1:
+                canvas.SetPixel(x, fourth_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
+            if fifth_r[x] == 1:
+                canvas.SetPixel(x, fifth_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
+
+        curr_state = (curr_state + 1) % 5
+        first_r = anim.STATES[curr_state][0]
+        second_r = anim.STATES[curr_state][1]
+        third_r = anim.STATES[curr_state][2]
+        fourth_r = anim.STATES[curr_state][3]
+        fifth_r = anim.STATES[curr_state][4]
+
+        return curr_state
+
+    
     def display_time(self, width, height, canvas, ltime):
         canvas.SetPixel(width-12, height-4, 0, 0, 0)
         canvas.SetPixel(width-12, height-6, 0, 0, 0)
@@ -109,16 +158,10 @@ class Tide(SampleBase):
     def run(self):
         width = self.matrix.width
         height = self.matrix.height
+        curr_state = 0
 
         p = mp.Process(target=self.get_data, args=(self.q,))
         p.start()
-
-        curr_state = 0
-        first_r = anim.STATES[curr_state][0]
-        second_r = anim.STATES[curr_state][1]
-        third_r = anim.STATES[curr_state][2]
-        fourth_r = anim.STATES[curr_state][3]
-        fifth_r = anim.STATES[curr_state][4]
 
         canvas = self.matrix.CreateFrameCanvas()
 
@@ -126,45 +169,8 @@ class Tide(SampleBase):
             canvas.Clear()
             if not self.q.empty():
                 self.data = self.q.get()
-            # 2.142 - min since early June 2023, 16.024 - max since early June 2023
-            pixelHeight = height - int(float(self.data['tideHeight']) * PIXEL_MULTI) - 1
-            
-            if pixelHeight > 56:
-                pixelHeight = 56
-            if pixelHeight < 13:
-                pixelHeight = 13
 
-            for x in range(width):
-                for y in range(pixelHeight, height):
-                    canvas.SetPixel(x, y, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
-
-            first_height, second_height, third_height, fourth_height, fifth_height = (
-                pixelHeight - 5,
-                pixelHeight - 4,
-                pixelHeight - 3,
-                pixelHeight - 2,
-                pixelHeight - 1,
-            )
-
-            for x in range(width):
-                if first_r[x] == 1:
-                    canvas.SetPixel(x, first_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
-                if second_r[x] == 1:
-                    canvas.SetPixel(x, second_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
-                if third_r[x] == 1:
-                    canvas.SetPixel(x, third_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
-                if fourth_r[x] == 1:
-                    canvas.SetPixel(x, fourth_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
-                if fifth_r[x] == 1:
-                    canvas.SetPixel(x, fifth_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
-
-            curr_state = (curr_state + 1) % 5
-            first_r = anim.STATES[curr_state][0]
-            second_r = anim.STATES[curr_state][1]
-            third_r = anim.STATES[curr_state][2]
-            fourth_r = anim.STATES[curr_state][3]
-            fifth_r = anim.STATES[curr_state][4]
-
+            curr_state = self.display_waves(width, height, canvas, curr_state)
             self.display_time(width, height, canvas, func.get_time())
             self.display_temp(width, canvas)
 
