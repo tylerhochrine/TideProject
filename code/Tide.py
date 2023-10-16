@@ -6,7 +6,7 @@ import Functions as func
 import Animation as anim
 
 
-PIXEL_MULTI = 2.6875
+PIXEL_MULTI = 3.12727272
 WATER_COLOR_R = 0
 WATER_COLOR_G = 157
 WATER_COLOR_B = 196
@@ -126,8 +126,13 @@ class Tide(SampleBase):
             canvas.Clear()
             if not self.q.empty():
                 self.data = self.q.get()
-                            
-            pixelHeight = height - int(float(self.data['tideHeight']) * PIXEL_MULTI) - 8
+            # 2.142 - min since early June 2023, 16.024 - max since early June 2023
+            pixelHeight = height - int(float(self.data['tideHeight']) * PIXEL_MULTI) - 1
+            
+            if pixelHeight > 56:
+                pixelHeight = 56
+            if pixelHeight < 13:
+                pixelHeight = 13
 
             for x in range(width):
                 for y in range(pixelHeight, height):

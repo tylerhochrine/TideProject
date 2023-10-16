@@ -10,7 +10,7 @@ def wait_for_internet_connection():
         print('trying to connect')
         try:
             print('connecting...')
-            response = urllib.request.urlopen('https://google.com', timeout=1)
+            urllib.request.urlopen('https://google.com', timeout=1)
             print('connection successful')
             return
         except Exception as e:
@@ -38,6 +38,8 @@ def get_air_temp(data):
     noaa_url = "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=latest&station=8443970&product" \
                "=air_temperature&datum=STND&time_zone=lst_ldt&units=english&format=json"
     response = requests.get(noaa_url)
+
+    print(float(response.json()['data'][0]['v']))
 
     data['airTemp'] = round(float(response.json()['data'][0]['v']))
 
