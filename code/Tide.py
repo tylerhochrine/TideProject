@@ -32,11 +32,11 @@ class Tide(SampleBase):
 
     
     def display_waves(self, width, height, canvas, curr_state):
-        first_r = anim.STATES[curr_state][0]
-        second_r = anim.STATES[curr_state][1]
-        third_r = anim.STATES[curr_state][2]
-        fourth_r = anim.STATES[curr_state][3]
-        fifth_r = anim.STATES[curr_state][4]
+        first_r = anim.WAVE_STATES[curr_state][0]
+        second_r = anim.WAVE_STATES[curr_state][1]
+        third_r = anim.WAVE_STATES[curr_state][2]
+        fourth_r = anim.WAVE_STATES[curr_state][3]
+        fifth_r = anim.WAVE_STATES[curr_state][4]
 
         # 2.142 - min since early June 2023, 16.024 - max since early June 2023
         pixelHeight = height - int(float(self.data['tideHeight']) * PIXEL_MULTI) - 1
@@ -71,11 +71,11 @@ class Tide(SampleBase):
                 canvas.SetPixel(x, fifth_height, WATER_COLOR_R, WATER_COLOR_G, WATER_COLOR_B)
 
         curr_state = (curr_state + 1) % 5
-        first_r = anim.STATES[curr_state][0]
-        second_r = anim.STATES[curr_state][1]
-        third_r = anim.STATES[curr_state][2]
-        fourth_r = anim.STATES[curr_state][3]
-        fifth_r = anim.STATES[curr_state][4]
+        first_r = anim.WAVE_STATES[curr_state][0]
+        second_r = anim.WAVE_STATES[curr_state][1]
+        third_r = anim.WAVE_STATES[curr_state][2]
+        fourth_r = anim.WAVE_STATES[curr_state][3]
+        fifth_r = anim.WAVE_STATES[curr_state][4]
 
         return curr_state
 
