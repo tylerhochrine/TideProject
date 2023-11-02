@@ -6,7 +6,7 @@ import Functions as func
 import Animation as anim
 
 
-PIXEL_MULTI = 3.12727272
+LOW_HEIGHT, HIGH_HEIGHT = 4, 16
 WATER_COLOR_R = 0
 WATER_COLOR_G = 157
 WATER_COLOR_B = 196
@@ -15,6 +15,7 @@ WATER_COLOR_B = 196
 class Tide(SampleBase):
     data = {'dtmTime': '', 'tideHeight': 0, 'airTemp': 0}
     q = mp.Queue()
+    PIXEL_MULTI = 43 / (HIGH_HEIGHT - LOW_HEIGHT) # 78.3333 − 3.58333x (78+(1/3)-3+(7/12)(height))
 
     def __init__(self, *args, **kwargs):
         super(Tide, self).__init__(*args, **kwargs)
@@ -38,8 +39,10 @@ class Tide(SampleBase):
         fourth_r = anim.WAVE_STATES[curr_state][3]
         fifth_r = anim.WAVE_STATES[curr_state][4]
 
-        # 2.142 - min since early June 2023, 16.024 - max since early June 2023
-        pixelHeight = height - int(float(self.data['tideHeight']) * PIXEL_MULTI) - 1
+        self.data['tideHeight'] = 4
+
+        # since June 2023: min: 2.142, max: 16.024
+        pixelHeight = height - int(((78+(1/3))-(3+(7/12)(float(self.data['tideHeight']))))) + 21 # 1.75 for low when 4, 
             
         if pixelHeight > 56:
            pixelHeight = 56
